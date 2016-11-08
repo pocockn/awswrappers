@@ -60,6 +60,18 @@ func GenerateMessages(count int) []*sqsLib.Message {
 }
 
 func TestClient(t *testing.T) {
+	t.Run(".QueueURL", func(t *testing.T) {
+		mock := MockSDKClient{}
+		client := NewTestClient(&mock)
+
+		expected := "http://www.test.com/queue_name"
+		actual := client.QueueURL()
+
+		if actual != expected {
+			t.Fatalf("Expected QueueURL to be '%s', got: '%s'", expected, actual)
+		}
+	})
+
 	t.Run(".ReceiveMessage", func(t *testing.T) {
 		t.Run("ClientCalledWithoutError", func(t *testing.T) {
 			mock := MockSDKClient{

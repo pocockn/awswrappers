@@ -15,6 +15,7 @@ type (
 	ClientWrapper interface {
 		ReceiveMessage() (*sqsLib.Message, error)
 		DeleteMessage(receiptHandle *string) error
+		QueueURL() string
 	}
 
 	// Client wraps the receive and delete functionality of SQS.
@@ -65,20 +66,22 @@ func (s Client) DeleteMessage(receiptHandle *string) error {
 	return nil
 }
 
-func (s Client) queueURL() string {
+// QueueURL returns the fully qualified url for the queue the client is
+// connecting to.
+func (s Client) QueueURL() string {
 	return fmt.Sprintf("%s/%s", s.clientConfig.QueueEndpoint, s.clientConfig.QueueName)
 }
 
 func (s Client) deleteMessageParams(receiptHandle *string) *sqsLib.DeleteMessageInput {
 	return &sqsLib.DeleteMessageInput{
-		QueueUrl:      aws.String(s.queueURL()),
+		QueueUrl:      aws.String(s.QueueURL()),
 		ReceiptHandle: receiptHandle,
 	}
 }
 
 func (s Client) receiveMessageParams() *sqsLib.ReceiveMessageInput {
 	return &sqsLib.ReceiveMessageInput{
-		QueueUrl: aws.String(s.queueURL()),
+		QueueUrl: aws.String(s.QueueURL()),
 		AttributeNames: []*string{
 			aws.String("All"),
 		},
