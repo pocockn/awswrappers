@@ -1,0 +1,40 @@
+hash: 36e6428d63658881a60359ac586e410b9f67278c8b1878d12cc7b691ee1f9576
+updated: 2016-11-08T14:14:17.88524574Z
+imports:
+- name: github.com/aws/aws-sdk-go
+  version: 45d21707a58c6bfdf7cf12197d054769d88f7d13
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - private/endpoints
+  - private/protocol
+  - private/protocol/json/jsonutil
+  - private/protocol/jsonrpc
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/xml/xmlutil
+  - service/kms
+  - service/sqs
+  - service/sqs/sqsiface
+  - service/sts
+- name: github.com/go-ini/ini
+  version: a2610b3a793cfa7fdf0b07038068af5ddc12aba1
+- name: github.com/jmespath/go-jmespath
+  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- name: github.com/vidsy/kmsconfig
+  version: 61f97a187cb2896cd86b7ec91f8b1153b2527f90
+testImports: []

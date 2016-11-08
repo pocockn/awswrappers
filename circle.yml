@@ -1,0 +1,20 @@
+general:
+  branches:
+    ignore:
+      - master
+
+machine:
+  environment:
+    DOCKER_IMAGE: vidsyhq/awswrappers
+  services:
+    - docker
+
+dependencies:
+  override:
+    - make build
+
+test:
+  override:
+    - make test_ci
+    - echo "Checking if value of VERSION file exists as Git tag..."
+    - make check-version
