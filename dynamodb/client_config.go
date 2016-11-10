@@ -12,7 +12,7 @@ type (
 // NewClientConfigFromKMSConfig creates a new client config based on config
 // values for the current environment.
 func NewClientConfigFromKMSConfig(config kmsconfig.ConfigInterrogator) (*ClientConfig, error) {
-	dynamoDBEndpoint, err := config.String("sqs", "dynamo_db_endpoint")
+	dynamoDBEndpoint, err := config.String("dynamodb", "dynamo_db_endpoint")
 	if err != nil {
 		return nil, err
 	}

@@ -26,7 +26,7 @@ func NewClient(config *ClientConfig, environment string, client dynamodbiface.Dy
 		var dynamoDBClient *dynamoDBLib.DynamoDB
 
 		if environment == "development" {
-			log.Println("Creating development SQS client")
+			log.Println("Creating development DynamoDB client")
 			dynamoDBClient = dynamoDBLib.New(
 				session.New(),
 				aws.NewConfig().WithEndpoint(config.DynamoDBEndpoint),
