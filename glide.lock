@@ -1,5 +1,5 @@
-hash: 36e6428d63658881a60359ac586e410b9f67278c8b1878d12cc7b691ee1f9576
-updated: 2016-11-08T14:14:17.88524574Z
+hash: 9a24fa694a0d4ee00805b8fd0f27da018403278058528ac4277840e25ea516c3
+updated: 2016-11-10T16:18:47.606123455Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 45d21707a58c6bfdf7cf12197d054769d88f7d13
@@ -27,6 +27,9 @@ imports:
   - private/protocol/query/queryutil
   - private/protocol/rest
   - private/protocol/xml/xmlutil
+  - private/waiter
+  - service/dynamodb
+  - service/dynamodb/dynamodbiface
   - service/kms
   - service/sqs
   - service/sqs/sqsiface
