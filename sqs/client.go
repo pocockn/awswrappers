@@ -26,18 +26,25 @@ type (
 )
 
 // NewClient creates a new wrapper based on the environment.
-func NewClient(config *ClientConfig, environment string) *Client {
-	var sqsClient *sqsLib.SQS
+func NewClient(config *ClientConfig, environment string, client sqsiface.SQSAPI) *Client {
+	if client == nil {
+		var sqsClient *sqsLib.SQS
 
-	if environment == "development" {
-		log.Println("Creating development SQS client")
-		sqsClient = sqsLib.New(session.New(), aws.NewConfig().WithEndpoint(config.QueueEndpoint))
-	} else {
-		sqsClient = sqsLib.New(session.New())
+		if environment == "development" {
+			log.Println("Creating development SQS client")
+			sqsClient = sqsLib.New(session.New(), aws.NewConfig().WithEndpoint(config.QueueEndpoint))
+		} else {
+			sqsClient = sqsLib.New(session.New())
+		}
+
+		return &Client{
+			sqsClient,
+			config,
+		}
 	}
 
 	return &Client{
-		sqsClient,
+		client,
 		config,
 	}
 }

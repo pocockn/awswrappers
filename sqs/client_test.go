@@ -1,4 +1,4 @@
-package sqs
+package sqs_test
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 
 	sqsLib "github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/vidsy/awswrappers/sqs"
 )
 
 type (
@@ -34,20 +35,17 @@ func (smc MockSDKClient) DeleteMessage(input *sqsLib.DeleteMessageInput) (*sqsLi
 	return nil, nil
 }
 
-func NewTestClient(mockClient *MockSDKClient) Client {
+func NewTestClient(mockClient *MockSDKClient) *sqs.Client {
 	if mockClient == nil {
 		mockClient = &MockSDKClient{}
 	}
 
-	config := ClientConfig{
+	config := sqs.ClientConfig{
 		QueueEndpoint: "http://www.test.com",
 		QueueName:     "queue_name",
 	}
 
-	return Client{
-		mockClient,
-		&config,
-	}
+	return sqs.NewClient(&config, "test", mockClient)
 }
 
 func GenerateMessages(count int) []*sqsLib.Message {

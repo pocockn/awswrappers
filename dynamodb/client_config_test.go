@@ -1,16 +1,16 @@
-package sqs_test
+package dynamodb_test
 
 import (
 	"testing"
 
 	"github.com/vidsy/awswrappers"
-	"github.com/vidsy/awswrappers/sqs"
+	"github.com/vidsy/awswrappers/dynamodb"
 )
 
 func TestClientConfig(t *testing.T) {
 	t.Run("NewClientConfigFromKMSConfig", func(t *testing.T) {
 		t.Run("CreatesWithValidConfig", func(t *testing.T) {
-			clientConfig, _ := sqs.NewClientConfigFromKMSConfig(&awswrappers.MockConfig{})
+			clientConfig, _ := dynamodb.NewClientConfigFromKMSConfig(&awswrappers.MockConfig{})
 
 			if clientConfig == nil {
 				t.Fatalf("Expected new ClientConfig, got: %v", clientConfig)
@@ -22,16 +22,12 @@ func TestClientConfig(t *testing.T) {
 				valueType string
 				key       string
 			}{
-				{"string", "endpoint_url"},
-				{"string", "queue_name"},
-				{"integer", "max_number_of_messages"},
-				{"integer", "visibility_timeout"},
-				{"integer", "wait_time_seconds"},
+				{"string", "dynamo_db_endpoint"},
 			}
 
 			for _, errorCase := range errorCases {
 				mockConfig := awswrappers.NewErrorConfig(errorCase.valueType, errorCase.key)
-				_, err := sqs.NewClientConfigFromKMSConfig(mockConfig)
+				_, err := dynamodb.NewClientConfigFromKMSConfig(mockConfig)
 
 				if err == nil {
 					t.Errorf(

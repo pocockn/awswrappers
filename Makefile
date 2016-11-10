@@ -29,11 +29,11 @@ test:
 	-v "${CURDIR}":${PATH_BASE}/${REPONAME} \
 	-w ${PATH_BASE}/${REPONAME} \
 	--entrypoint=go \
-	${GO_BUILDER_IMAGE} test ./sqs
+	${GO_BUILDER_IMAGE} test ./sqs ./dynamodb
 
 test_ci:
 	@docker run \
 	-v "${CURDIR}":${PATH_BASE}/${REPONAME} \
 	-w ${PATH_BASE}/${REPONAME} \
 	--entrypoint=go \
-	${GO_BUILDER_IMAGE} test ./sqs -cover
+	${GO_BUILDER_IMAGE} test ./sqs ./dynamodb -cover
