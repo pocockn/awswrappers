@@ -25,8 +25,8 @@ func NewClient(config *ClientConfig, environment string, client dynamodbiface.Dy
 	if client == nil {
 		var dynamoDBClient *dynamoDBLib.DynamoDB
 
-		if environment == "development" {
-			log.Println("Creating development DynamoDB client")
+		if environment == "development" || environment == "docker" {
+			log.Println("Creating development/docker DynamoDB client")
 			dynamoDBClient = dynamoDBLib.New(
 				session.New(),
 				aws.NewConfig().WithEndpoint(config.DynamoDBEndpoint),
