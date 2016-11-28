@@ -1,8 +1,8 @@
-hash: 9a24fa694a0d4ee00805b8fd0f27da018403278058528ac4277840e25ea516c3
-updated: 2016-11-10T16:18:47.606123455Z
+hash: fdf5967c65098f272da67de885fd48f068e902b2ec9ca1b69e5d5c6673ea50b1
+updated: 2016-11-28T13:14:20.061672513Z
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 45d21707a58c6bfdf7cf12197d054769d88f7d13
+  version: 4a6ff995f57ee4f8994db17ae83f01a9c9cc2274
   subpackages:
   - aws
   - aws/awserr
@@ -38,6 +38,8 @@ imports:
   version: a2610b3a793cfa7fdf0b07038068af5ddc12aba1
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- name: github.com/vidsy/backoff
+  version: 715d207c270e1f65b2fa8f9997463555123bb46a
 - name: github.com/vidsy/kmsconfig
   version: 61f97a187cb2896cd86b7ec91f8b1153b2527f90
 testImports: []

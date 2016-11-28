@@ -13,7 +13,7 @@ type (
 	}
 )
 
-func NewTestClient(mockClient *MockSDKClient) *dynamodb.Client {
+func NewTestClient(mockClient *MockSDKClient) (*dynamodb.Client, error) {
 	if mockClient == nil {
 		mockClient = &MockSDKClient{}
 	}
@@ -22,7 +22,7 @@ func NewTestClient(mockClient *MockSDKClient) *dynamodb.Client {
 		DynamoDBEndpoint: "http://www.test.com",
 	}
 
-	return dynamodb.NewClient(&config, "test", mockClient)
+	return dynamodb.NewClient(&config, "test", nil, nil, mockClient)
 }
 
 func TestClient(t *testing.T) {
