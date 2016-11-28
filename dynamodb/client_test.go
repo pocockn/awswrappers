@@ -22,7 +22,7 @@ func NewTestClient(mockClient *MockSDKClient) (*dynamodb.Client, error) {
 		DynamoDBEndpoint: "http://www.test.com",
 	}
 
-	return dynamodb.NewClient(&config, "test", nil, nil, mockClient)
+	return dynamodb.NewClient(&config, mockClient)
 }
 
 func TestClient(t *testing.T) {

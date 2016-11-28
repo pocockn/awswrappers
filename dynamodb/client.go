@@ -26,26 +26,13 @@ type (
 )
 
 // NewClient creates a new wrapper based on the environment.
-func NewClient(config *ClientConfig, environment string, backoffIntervals *[]int, logPrefix *string, client dynamodbiface.DynamoDBAPI) (*Client, error) {
+func NewClient(config *ClientConfig, client dynamodbiface.DynamoDBAPI) (*Client, error) {
+	log.Println("Creating live DynamoDB client")
+
 	if client == nil {
 		var dynamoDBClient *dynamoDBLib.DynamoDB
 
-		if environment == "development" || environment == "docker" {
-			log.Println("Creating development/docker DynamoDB client")
-
-			err := testConnection(config.DynamoDBEndpoint, *backoffIntervals, *logPrefix)
-			if err != nil {
-				return nil, err
-			}
-
-			dynamoDBClient = dynamoDBLib.New(
-				session.New(),
-				aws.NewConfig().WithEndpoint(config.DynamoDBEndpoint),
-			)
-		} else {
-			log.Println("Creating live DynamoDB client")
-			dynamoDBClient = dynamoDBLib.New(session.New())
-		}
+		dynamoDBClient = dynamoDBLib.New(session.New())
 
 		return &Client{
 			dynamoDBClient,
@@ -55,6 +42,27 @@ func NewClient(config *ClientConfig, environment string, backoffIntervals *[]int
 
 	return &Client{
 		client,
+		config,
+	}, nil
+}
+
+// NewDevelopmentClient acts the same as NewClient() however contains logic to
+// backoff the connection to the DynamoDB store.
+func NewDevelopmentClient(config *ClientConfig, backoffIntervals *[]int, logPrefix *string) (*Client, error) {
+	log.Println("Creating development DynamoDB client")
+
+	err := testConnection(config.DynamoDBEndpoint, *backoffIntervals, *logPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	dynamoDBClient := dynamoDBLib.New(
+		session.New(),
+		aws.NewConfig().WithEndpoint(config.DynamoDBEndpoint),
+	)
+
+	return &Client{
+		dynamoDBClient,
 		config,
 	}, nil
 }
