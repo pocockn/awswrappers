@@ -3,6 +3,7 @@ package dynamodb
 import (
 	"errors"
 	"net"
+	"net/url"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -64,8 +65,13 @@ func testConnection(endpoint string, backoffIntervals []int, logPrefix string) e
 		LogPrefix: logPrefix,
 	}
 
+	parsedURL, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+
 	connected := bp.Perform(func() bool {
-		_, err := net.Dial("tcp", endpoint)
+		_, err := net.Dial("tcp", parsedURL.Host)
 		if err != nil {
 			return false
 		}
