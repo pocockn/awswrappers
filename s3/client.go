@@ -1,6 +1,8 @@
 package s3
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	s3Lib "github.com/aws/aws-sdk-go/service/s3"
@@ -39,4 +41,21 @@ func NewClient(config *ClientConfig, environment string, client s3iface.S3API) *
 		client,
 		config,
 	}
+}
+
+// PresignedURI takes a bucket, key and expiration and returns a presigned URI.
+func (c Client) PresignedURI(bucket string, key string, expiration time.Duration) (string, error) {
+	request, _ := c.PutObjectRequest(
+		&s3Lib.PutObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
+		},
+	)
+
+	url, err := request.Presign(expiration)
+	if err != nil {
+		return "", err
+	}
+
+	return url, nil
 }
