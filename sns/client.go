@@ -18,11 +18,11 @@ type (
 )
 
 // NewClient creates a new wrapper based on the environment.
-func NewClient(config *ClientConfig, environment string, client snsiface.SNSAPI) *Client {
+func NewClient(config *ClientConfig, useDevelopmentClient bool, client snsiface.SNSAPI) *Client {
 	if client == nil {
 		var snsClient *snsLib.SNS
 
-		if environment == "development" {
+		if useDevelopmentClient {
 			log.Println("Creating development sns client")
 			snsClient = snsLib.New(session.New(), aws.NewConfig().WithEndpoint(config.Endpoint))
 		} else {

@@ -20,11 +20,11 @@ type (
 )
 
 // NewClient creates a new wrapper based on the environment.
-func NewClient(config *ClientConfig, environment string, client s3iface.S3API) *Client {
+func NewClient(config *ClientConfig, useDevelopmentClient bool, client s3iface.S3API) *Client {
 	if client == nil {
 		var s3Client *s3Lib.S3
 
-		if environment == "development" {
+		if useDevelopmentClient {
 			log.Println("Creating development S3 client")
 			s3Client = s3Lib.New(session.New(), aws.NewConfig().WithEndpoint(config.Endpoint))
 		} else {

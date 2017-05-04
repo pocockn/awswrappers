@@ -45,7 +45,7 @@ func NewTestClient(mockClient *MockSDKClient) *sqs.Client {
 		QueueName:     "queue_name",
 	}
 
-	return sqs.NewClient(&config, "test", mockClient)
+	return sqs.NewClient(&config, true, mockClient)
 }
 
 func GenerateMessages(count int) []*sqsLib.Message {

@@ -35,7 +35,7 @@ func NewTestClient(mockClient *MockSDKClient) *sns.Client {
 		Endpoint: "http://www.test.com",
 	}
 
-	return sns.NewClient(&config, "development", mockClient)
+	return sns.NewClient(&config, true, mockClient)
 }
 
 func TestClient(t *testing.T) {

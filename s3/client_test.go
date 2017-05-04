@@ -37,7 +37,7 @@ func NewTestClient(mockClient *MockSDKClient) *s3.Client {
 		Endpoint: "http://www.test.com",
 	}
 
-	return s3.NewClient(&config, "development", mockClient)
+	return s3.NewClient(&config, true, mockClient)
 }
 
 func TestClient(t *testing.T) {
