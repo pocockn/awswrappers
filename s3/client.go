@@ -26,7 +26,11 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client s3iface.S
 
 		if useDevelopmentClient {
 			log.Println("Creating development S3 client")
-			s3Client = s3Lib.New(session.New(), aws.NewConfig().WithEndpoint(config.Endpoint))
+			config := &aws.Config{
+				Endpoint:         aws.String(config.Endpoint),
+				S3ForcePathStyle: aws.Bool(true),
+			}
+			s3Client = s3Lib.New(session.New(), config)
 		} else {
 			s3Client = s3Lib.New(session.New())
 		}
