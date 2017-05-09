@@ -9,6 +9,16 @@ import (
 	"log"
 )
 
+const (
+	// PromotionalSMSType for SMS messages that are non
+	// critical such as promotional.
+	PromotionalSMSType = "Promotional"
+
+	// TransactionalSMSType for SMS messages that are
+	// critical to user such as MFA tokens.
+	TransactionalSMSType = "Transactional"
+)
+
 type (
 	// Client wraps the receive and delete functionality of sns.
 	Client struct {
@@ -42,10 +52,22 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client snsiface.
 }
 
 // SendSMSMessage sends an SMS message and returns the MessageID.
-func (c Client) SendSMSMessage(number string, message string) (string, error) {
+func (c Client) SendSMSMessage(number string, from string, messageType string, message string) (string, error) {
+	messageAttributes := map[string]*snsLib.MessageAttributeValue{
+		"AWS.SNS.SMS.SenderID": &snsLib.MessageAttributeValue{
+			DataType:    aws.String("String"),
+			StringValue: aws.String(from),
+		},
+		"AWS.SNS.SMS.SMSType": &snsLib.MessageAttributeValue{
+			DataType:    aws.String("String"),
+			StringValue: aws.String(messageType),
+		},
+	}
+
 	params := &snsLib.PublishInput{
-		Message:     aws.String(message),
-		PhoneNumber: aws.String(number),
+		Message:           aws.String(message),
+		MessageAttributes: messageAttributes,
+		PhoneNumber:       aws.String(number),
 	}
 
 	response, err := c.Publish(params)

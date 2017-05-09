@@ -51,7 +51,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(mockClient)
-			publishMessageID, err := client.SendSMSMessage("0123456789", "Hey, this is a test message!")
+			publishMessageID, err := client.SendSMSMessage("0123456789", "Foo", sns.PromotionalSMSType, "Hey, this is a test message!")
 
 			if err != nil {
 				t.Fatalf("Expected .Publish() to not return an error, got: '%s'", err)
@@ -70,7 +70,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(mockClient)
-			_, err := client.SendSMSMessage("0123456789", "Hey, this is a test message!")
+			_, err := client.SendSMSMessage("0123456789", "Foo", sns.PromotionalSMSType, "Hey, this is a test message!")
 
 			if err == nil {
 				t.Fatal("Expected .Publish() to return an error", err)
