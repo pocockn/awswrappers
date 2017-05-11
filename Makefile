@@ -3,6 +3,7 @@ VERSION = $(shell cat ./VERSION)
 PATH_BASE ?= "/go/src/github.com/vidsy"
 GO_BUILDER_IMAGE ?= "vidsyhq/go-builder"
 REPONAME ?= "awswrappers"
+TEST_PACKAGES ?= "./sqs ./dynamodb ./s3 ./sns"
 
 DEFAULT: test
 
@@ -23,17 +24,20 @@ build:
 	${GO_BUILDER_IMAGE}
 
 test:
+	@go test "${TEST_PACKAGES}"
+
+test-docker:
 	@docker run \
 	-it \
 	--rm \
 	-v "${CURDIR}":${PATH_BASE}/${REPONAME} \
 	-w ${PATH_BASE}/${REPONAME} \
 	--entrypoint=go \
-	${GO_BUILDER_IMAGE} test ./sqs ./dynamodb ./s3 ./sns
+	${GO_BUILDER_IMAGE} test "${TEST_PACKAGES}"
 
 test_ci:
 	@docker run \
 	-v "${CURDIR}":${PATH_BASE}/${REPONAME} \
 	-w ${PATH_BASE}/${REPONAME} \
 	--entrypoint=go \
-	${GO_BUILDER_IMAGE} test ./sqs ./dynamodb ./s3 ./sns  -cover
+	${GO_BUILDER_IMAGE} test "${TEST_PACKAGES}" -cover
