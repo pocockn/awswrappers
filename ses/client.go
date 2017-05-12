@@ -39,6 +39,10 @@ func (c Client) SendEmailMessage(recipients []string, from string, subject strin
 	}
 
 	message := &sesLib.Message{
+		Subject: &sesLib.Content{
+			Charset: aws.String("UTF-8"),
+			Data:    aws.String(subject),
+		},
 		Body: &sesLib.Body{
 			Text: &sesLib.Content{
 				Charset: aws.String("UTF-8"),
