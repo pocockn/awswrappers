@@ -3,7 +3,7 @@ VERSION = $(shell cat ./VERSION)
 PATH_BASE ?= "/go/src/github.com/vidsy"
 GO_BUILDER_IMAGE ?= "vidsyhq/go-builder"
 REPONAME ?= "awswrappers"
-TEST_PACKAGES ?= "./sqs ./dynamodb ./s3 ./sns"
+TEST_PACKAGES ?= "./sqs ./dynamodb ./s3 ./sns ./elastictranscoder"
 
 DEFAULT: test
 
