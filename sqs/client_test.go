@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
 	sqsLib "github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 	"github.com/vidsy/awswrappers/sqs"
@@ -15,9 +16,18 @@ type (
 		sqsiface.SQSAPI
 
 		mockReceiveMessage func(*sqsLib.ReceiveMessageInput) (*sqsLib.ReceiveMessageOutput, error)
+		mockSendMessage    func(*sqsLib.SendMessageInput) (*sqsLib.SendMessageOutput, error)
 		mockDeleteMessge   func(*sqsLib.DeleteMessageInput) (*sqsLib.DeleteMessageOutput, error)
 	}
 )
+
+func (smc MockSDKClient) SendMessage(input *sqsLib.SendMessageInput) (*sqsLib.SendMessageOutput, error) {
+	if smc.mockSendMessage != nil {
+		return smc.mockSendMessage(input)
+	}
+
+	return nil, nil
+}
 
 func (smc MockSDKClient) ReceiveMessage(input *sqsLib.ReceiveMessageInput) (*sqsLib.ReceiveMessageOutput, error) {
 	if smc.mockReceiveMessage != nil {
@@ -123,6 +133,60 @@ func TestClient(t *testing.T) {
 
 			if message != nil || err != nil {
 				t.Fatalf("Expected no error and no message, got: %v and %v", message, err)
+			}
+		})
+	})
+
+	t.Run(".SendMessage", func(t *testing.T) {
+		message := []byte("test message")
+
+		t.Run("ClientCalledWithoutError", func(t *testing.T) {
+			mock := MockSDKClient{
+				mockSendMessage: func(input *sqsLib.SendMessageInput) (*sqsLib.SendMessageOutput, error) {
+					return &sqsLib.SendMessageOutput{
+						MessageId: aws.String("1"),
+					}, nil
+				},
+			}
+
+			client := NewTestClient(&mock)
+			_, err := client.SendMessage(message)
+
+			if err != nil {
+				t.Fatalf("Expected no error to occur, got: %v", err)
+			}
+		})
+
+		t.Run("MessageIDReturned", func(t *testing.T) {
+			messageID := "1"
+			mock := MockSDKClient{
+				mockSendMessage: func(input *sqsLib.SendMessageInput) (*sqsLib.SendMessageOutput, error) {
+					return &sqsLib.SendMessageOutput{
+						MessageId: aws.String(messageID),
+					}, nil
+				},
+			}
+
+			client := NewTestClient(&mock)
+			newMessageID, _ := client.SendMessage(message)
+
+			if newMessageID != messageID {
+				t.Fatalf("Expected message to be '%s', got: %s", messageID, newMessageID)
+			}
+		})
+
+		t.Run("ReturnsErrorOnClientError", func(t *testing.T) {
+			mock := MockSDKClient{
+				mockSendMessage: func(input *sqsLib.SendMessageInput) (*sqsLib.SendMessageOutput, error) {
+					return nil, errors.New("Client error")
+				},
+			}
+
+			client := NewTestClient(&mock)
+			_, err := client.SendMessage(message)
+
+			if err == nil {
+				t.Fatal("Expected error to be returned")
 			}
 		})
 	})

@@ -63,6 +63,21 @@ func (s Client) ReceiveMessage() (*sqsLib.Message, error) {
 	return nil, nil
 }
 
+// SendMessage sends an SQS message on the given queue.
+func (s Client) SendMessage(body []byte) (string, error) {
+	params := &sqsLib.SendMessageInput{
+		MessageBody: aws.String(string(body[:])),
+		QueueUrl:    aws.String(s.QueueURL()),
+	}
+
+	resp, err := s.SQSAPI.SendMessage(params)
+	if err != nil {
+		return "", err
+	}
+
+	return *resp.MessageId, nil
+}
+
 // DeleteMessage removes a message based on the recipt handle.
 func (s Client) DeleteMessage(receiptHandle *string) error {
 	_, err := s.SQSAPI.DeleteMessage(s.deleteMessageParams(receiptHandle))
