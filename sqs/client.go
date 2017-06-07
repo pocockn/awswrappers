@@ -63,8 +63,8 @@ func (s Client) ReceiveMessage() (*sqsLib.Message, error) {
 	return nil, nil
 }
 
-// SendMessage sends an SQS message on the given queue.
-func (s Client) SendMessage(body []byte) (string, error) {
+// SendNewMessage sends an SQS message on the given queue.
+func (s Client) SendNewMessage(body []byte) (string, error) {
 	params := &sqsLib.SendMessageInput{
 		MessageBody: aws.String(string(body[:])),
 		QueueUrl:    aws.String(s.QueueURL()),

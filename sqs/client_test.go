@@ -137,7 +137,7 @@ func TestClient(t *testing.T) {
 		})
 	})
 
-	t.Run(".SendMessage", func(t *testing.T) {
+	t.Run(".SendNewMessage", func(t *testing.T) {
 		message := []byte("test message")
 
 		t.Run("ClientCalledWithoutError", func(t *testing.T) {
@@ -150,7 +150,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			_, err := client.SendMessage(message)
+			_, err := client.SendNewMessage(message)
 
 			if err != nil {
 				t.Fatalf("Expected no error to occur, got: %v", err)
@@ -168,7 +168,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			newMessageID, _ := client.SendMessage(message)
+			newMessageID, _ := client.SendNewMessage(message)
 
 			if newMessageID != messageID {
 				t.Fatalf("Expected message to be '%s', got: %s", messageID, newMessageID)
@@ -183,7 +183,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			_, err := client.SendMessage(message)
+			_, err := client.SendNewMessage(message)
 
 			if err == nil {
 				t.Fatal("Expected error to be returned")
