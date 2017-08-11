@@ -52,7 +52,6 @@ func NewTestClient(mockClient *MockSDKClient) *sqs.Client {
 
 	config := sqs.ClientConfig{
 		QueueEndpoint: "http://www.test.com",
-		QueueName:     "queue_name",
 	}
 
 	return sqs.NewClient(&config, true, mockClient)
@@ -68,18 +67,6 @@ func GenerateMessages(count int) []*sqsLib.Message {
 }
 
 func TestClient(t *testing.T) {
-	t.Run(".QueueURL", func(t *testing.T) {
-		mock := MockSDKClient{}
-		client := NewTestClient(&mock)
-
-		expected := "http://www.test.com/queue_name"
-		actual := client.QueueURL()
-
-		if actual != expected {
-			t.Fatalf("Expected QueueURL to be '%s', got: '%s'", expected, actual)
-		}
-	})
-
 	t.Run(".ReceiveMessage", func(t *testing.T) {
 		t.Run("ClientCalledWithoutError", func(t *testing.T) {
 			mock := MockSDKClient{
@@ -91,7 +78,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			_, err := client.ReceiveMessage()
+			_, err := client.ReceiveMessage("foo")
 
 			if err != nil {
 				t.Fatalf("Expected no error to occur, got: %v", err)
@@ -112,7 +99,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			message, _ := client.ReceiveMessage()
+			message, _ := client.ReceiveMessage("foo")
 
 			if message != mockMessage {
 				t.Fatalf("Expected message to be returned, got: %v", message)
@@ -129,7 +116,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			message, err := client.ReceiveMessage()
+			message, err := client.ReceiveMessage("foo")
 
 			if message != nil || err != nil {
 				t.Fatalf("Expected no error and no message, got: %v and %v", message, err)
@@ -150,7 +137,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			_, err := client.SendNewMessage(message)
+			_, err := client.SendNewMessage("foo", message)
 
 			if err != nil {
 				t.Fatalf("Expected no error to occur, got: %v", err)
@@ -168,7 +155,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			newMessageID, _ := client.SendNewMessage(message)
+			newMessageID, _ := client.SendNewMessage("foo", message)
 
 			if newMessageID != messageID {
 				t.Fatalf("Expected message to be '%s', got: %s", messageID, newMessageID)
@@ -183,7 +170,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			_, err := client.SendNewMessage(message)
+			_, err := client.SendNewMessage("foo", message)
 
 			if err == nil {
 				t.Fatal("Expected error to be returned")
@@ -196,7 +183,7 @@ func TestClient(t *testing.T) {
 
 		t.Run("ClientCalledWithoutError", func(t *testing.T) {
 			client := NewTestClient(nil)
-			err := client.DeleteMessage(&handle)
+			err := client.DeleteMessage("foo", &handle)
 
 			if err != nil {
 				t.Fatalf("Expected no error to occur, got: %v", err)
@@ -211,7 +198,7 @@ func TestClient(t *testing.T) {
 			}
 
 			client := NewTestClient(&mock)
-			err := client.DeleteMessage(&handle)
+			err := client.DeleteMessage("foo", &handle)
 
 			if err == nil {
 				t.Fatalf("Expected error from client, got: %v", err)

@@ -50,8 +50,8 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client sqsiface.
 }
 
 // ReceiveMessage Returns a message from SQS.
-func (s Client) ReceiveMessage() (*sqsLib.Message, error) {
-	resp, err := s.SQSAPI.ReceiveMessage(s.receiveMessageParams())
+func (s Client) ReceiveMessage(queueName string) (*sqsLib.Message, error) {
+	resp, err := s.SQSAPI.ReceiveMessage(s.receiveMessageParams(queueName))
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +64,10 @@ func (s Client) ReceiveMessage() (*sqsLib.Message, error) {
 }
 
 // SendNewMessage sends an SQS message on the given queue.
-func (s Client) SendNewMessage(body []byte) (string, error) {
+func (s Client) SendNewMessage(queueName string, body []byte) (string, error) {
 	params := &sqsLib.SendMessageInput{
 		MessageBody: aws.String(string(body[:])),
-		QueueUrl:    aws.String(s.QueueURL()),
+		QueueUrl:    aws.String(s.queueURL(queueName)),
 	}
 
 	resp, err := s.SQSAPI.SendMessage(params)
@@ -79,8 +79,8 @@ func (s Client) SendNewMessage(body []byte) (string, error) {
 }
 
 // DeleteMessage removes a message based on the recipt handle.
-func (s Client) DeleteMessage(receiptHandle *string) error {
-	_, err := s.SQSAPI.DeleteMessage(s.deleteMessageParams(receiptHandle))
+func (s Client) DeleteMessage(queueName string, receiptHandle *string) error {
+	_, err := s.SQSAPI.DeleteMessage(s.deleteMessageParams(queueName, receiptHandle))
 	if err != nil {
 		return err
 	}
@@ -88,22 +88,20 @@ func (s Client) DeleteMessage(receiptHandle *string) error {
 	return nil
 }
 
-// QueueURL returns the fully qualified url for the queue the client is
-// connecting to.
-func (s Client) QueueURL() string {
-	return fmt.Sprintf("%s/%s", s.clientConfig.QueueEndpoint, s.clientConfig.QueueName)
+func (s Client) queueURL(queueName string) string {
+	return fmt.Sprintf("%s/%s", s.clientConfig.QueueEndpoint, queueName)
 }
 
-func (s Client) deleteMessageParams(receiptHandle *string) *sqsLib.DeleteMessageInput {
+func (s Client) deleteMessageParams(queueName string, receiptHandle *string) *sqsLib.DeleteMessageInput {
 	return &sqsLib.DeleteMessageInput{
-		QueueUrl:      aws.String(s.QueueURL()),
+		QueueUrl:      aws.String(s.queueURL(queueName)),
 		ReceiptHandle: receiptHandle,
 	}
 }
 
-func (s Client) receiveMessageParams() *sqsLib.ReceiveMessageInput {
+func (s Client) receiveMessageParams(queueName string) *sqsLib.ReceiveMessageInput {
 	return &sqsLib.ReceiveMessageInput{
-		QueueUrl: aws.String(s.QueueURL()),
+		QueueUrl: aws.String(s.queueURL(queueName)),
 		AttributeNames: []*string{
 			aws.String("All"),
 		},

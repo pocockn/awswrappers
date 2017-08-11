@@ -6,7 +6,6 @@ type (
 	// ClientConfig store config values for the Client.
 	ClientConfig struct {
 		QueueEndpoint       string
-		QueueName           string
 		MaxNumberOfMessages int64
 		VisibilityTimeout   int64
 		WaitTimeSeconds     int64
@@ -17,11 +16,6 @@ type (
 // for the current environment.
 func NewClientConfigFromKMSConfig(config kmsconfig.ConfigInterrogator) (*ClientConfig, error) {
 	endpointURL, err := config.String("sqs", "endpoint_url")
-	if err != nil {
-		return nil, err
-	}
-
-	queueName, err := config.String("sqs", "queue_name")
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +37,6 @@ func NewClientConfigFromKMSConfig(config kmsconfig.ConfigInterrogator) (*ClientC
 
 	return &ClientConfig{
 		endpointURL,
-		queueName,
 		int64(maxNumberOfmessages),
 		int64(visibilityTimeout),
 		int64(waitTimeSeconds),

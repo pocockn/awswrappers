@@ -23,7 +23,6 @@ func TestClientConfig(t *testing.T) {
 				key       string
 			}{
 				{"string", "endpoint_url"},
-				{"string", "queue_name"},
 				{"integer", "max_number_of_messages"},
 				{"integer", "visibility_timeout"},
 				{"integer", "wait_time_seconds"},
