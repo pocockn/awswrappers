@@ -13,9 +13,9 @@ import (
 type (
 	// ClientWrapper interface for client wrapping sqs.
 	ClientWrapper interface {
-		ReceiveMessage() (*sqsLib.Message, error)
-		DeleteMessage(receiptHandle *string) error
-		QueueURL() string
+		DeleteMessage(queueName string, receiptHandle *string) error
+		ReceiveMessage(queueName string) (*sqsLib.Message, error)
+		SendNewMessage(queueName string, body []byte) (string, error)
 	}
 
 	// Client wraps the receive and delete functionality of SQS.
