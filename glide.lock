@@ -1,8 +1,8 @@
-hash: fdf5967c65098f272da67de885fd48f068e902b2ec9ca1b69e5d5c6673ea50b1
-updated: 2016-11-28T13:14:20.061672513Z
+hash: 0e019f49271c63be205c61b4d869171999943c0891a14f6d775bca42242595d8
+updated: 2017-09-12T11:22:14.282749095+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 4a6ff995f57ee4f8994db17ae83f01a9c9cc2274
+  version: 49cd7b4cfcfcae1eb815db0a9139f07340bf49c8
   subpackages:
   - aws
   - aws/awserr
@@ -16,21 +16,32 @@ imports:
   - aws/credentials/stscreds
   - aws/defaults
   - aws/ec2metadata
+  - aws/endpoints
   - aws/request
   - aws/session
   - aws/signer/v4
-  - private/endpoints
+  - internal/shareddefaults
   - private/protocol
   - private/protocol/json/jsonutil
   - private/protocol/jsonrpc
   - private/protocol/query
   - private/protocol/query/queryutil
   - private/protocol/rest
+  - private/protocol/restjson
+  - private/protocol/restxml
   - private/protocol/xml/xmlutil
-  - private/waiter
   - service/dynamodb
   - service/dynamodb/dynamodbiface
+  - service/elastictranscoder
+  - service/elastictranscoder/elastictranscoderiface
   - service/kms
+  - service/kms/kmsiface
+  - service/s3
+  - service/s3/s3iface
+  - service/ses
+  - service/ses/sesiface
+  - service/sns
+  - service/sns/snsiface
   - service/sqs
   - service/sqs/sqsiface
   - service/sts
@@ -42,4 +53,16 @@ imports:
   version: 715d207c270e1f65b2fa8f9997463555123bb46a
 - name: github.com/vidsy/kmsconfig
   version: 61f97a187cb2896cd86b7ec91f8b1153b2527f90
-testImports: []
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  subpackages:
+  - assert
