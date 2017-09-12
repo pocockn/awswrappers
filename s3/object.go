@@ -65,6 +65,7 @@ func (s Object) Put(body io.ReadSeeker, contentType string) error {
 		Bucket:      aws.String(s.Bucket),
 		Key:         aws.String(s.Key),
 		ContentType: aws.String(contentType),
+		Body:        aws.ReadSeekCloser(body),
 	}
 
 	_, err := s.client.PutObject(params)
