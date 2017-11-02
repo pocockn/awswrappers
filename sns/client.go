@@ -51,6 +51,21 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client snsiface.
 	}
 }
 
+// PublishMessage sends a message to a SNS topic.
+func (c Client) PublishMessage(message string, topicARN string) (string, error) {
+	params := &snsLib.PublishInput{
+		Message:  aws.String(message),
+		TopicArn: aws.String(topicARN),
+	}
+
+	response, err := c.Publish(params)
+	if err != nil {
+		return "", err
+	}
+
+	return *response.MessageId, nil
+}
+
 // SendSMSMessage sends an SMS message and returns the MessageID.
 func (c Client) SendSMSMessage(number string, from string, messageType string, message string) (string, error) {
 	messageAttributes := map[string]*snsLib.MessageAttributeValue{
