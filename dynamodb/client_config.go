@@ -1,6 +1,6 @@
 package dynamodb
 
-import "github.com/vidsy/kmsconfig"
+import "github.com/vidsy/go-kmsconfig/kmsconfig"
 
 type (
 	// ClientConfig store config values for the DynamoDB Client.
