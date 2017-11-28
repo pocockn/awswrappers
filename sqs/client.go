@@ -78,6 +78,22 @@ func (s Client) SendNewMessage(queueName string, body []byte) (string, error) {
 	return *resp.MessageId, nil
 }
 
+// SendNewFIFOMessage sends an SQS message on the given FIFO queue.
+func (s Client) SendNewFIFOMessage(queueName string, body []byte, deduplicationID string) (string, error) {
+	params := &sqsLib.SendMessageInput{
+		MessageBody:            aws.String(string(body[:])),
+		MessageDeduplicationId: aws.String(deduplicationID),
+		QueueUrl:               aws.String(s.queueURL(queueName)),
+	}
+
+	resp, err := s.SQSAPI.SendMessage(params)
+	if err != nil {
+		return "", err
+	}
+
+	return *resp.MessageId, nil
+}
+
 // DeleteMessage removes a message based on the recipt handle.
 func (s Client) DeleteMessage(queueName string, receiptHandle *string) error {
 	_, err := s.SQSAPI.DeleteMessage(s.deleteMessageParams(queueName, receiptHandle))
