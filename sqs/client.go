@@ -79,10 +79,11 @@ func (s Client) SendNewMessage(queueName string, body []byte) (string, error) {
 }
 
 // SendNewFIFOMessage sends an SQS message on the given FIFO queue.
-func (s Client) SendNewFIFOMessage(queueName string, body []byte, deduplicationID string) (string, error) {
+func (s Client) SendNewFIFOMessage(queueName string, body []byte, deduplicationID string, groupID string) (string, error) {
 	params := &sqsLib.SendMessageInput{
 		MessageBody:            aws.String(string(body[:])),
 		MessageDeduplicationId: aws.String(deduplicationID),
+		MessageGroupId:         aws.String(groupID),
 		QueueUrl:               aws.String(s.queueURL(queueName)),
 	}
 
