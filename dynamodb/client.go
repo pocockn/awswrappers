@@ -78,17 +78,17 @@ func testConnection(endpoint string, backoffIntervals []int, logPrefix string) e
 		return err
 	}
 
-	connected := bp.Perform(func() bool {
+	connected, _ := bp.Perform(func() (bool, error) {
 		_, err := net.Dial("tcp", parsedURL.Host)
 		if err != nil {
-			return false
+			return false, nil
 		}
 
-		return true
+		return true, nil
 	})
 
 	if !connected {
-		return errors.New("Unable to connect to DynamoDB after backoff.")
+		return errors.New("Unable to connect to DynamoDB after backoff")
 	}
 
 	return nil
