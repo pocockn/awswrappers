@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	dynamoDBLib "github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/vidsy/backoff"
 
@@ -92,4 +93,31 @@ func testConnection(endpoint string, backoffIntervals []int, logPrefix string) e
 	}
 
 	return nil
+}
+
+// PutItem extends the default clients PutItem taking a struct that implements
+// the marshaler interface.
+func (c Client) PutItem(item Marshaler) (*dynamoDBLib.PutItemOutput, error) {
+	putItemInput, err := item.Marshal()
+	if err != nil {
+		return nil, err
+	}
+
+	return c.DynamoDBAPI.PutItem(putItemInput)
+}
+
+// Query extends the default clients Query and takes the query params and
+// struct to unmarshal the data into.
+func (c Client) Query(input *dynamoDBLib.QueryInput, bindModel interface{}) (*dynamoDBLib.QueryOutput, error) {
+	output, err := c.DynamoDBAPI.Query(input)
+	if err != nil {
+		return output, err
+	}
+
+	err = dynamodbattribute.UnmarshalListOfMaps(output.Items, &bindModel)
+	if err != nil {
+		return output, err
+	}
+
+	return output, nil
 }
