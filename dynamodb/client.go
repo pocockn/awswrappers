@@ -11,8 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/vidsy/backoff"
-
-	"log"
 )
 
 type (
@@ -26,19 +24,26 @@ type (
 	}
 )
 
+var (
+	developmentBackoffIntervals = []int{0, 500, 1000, 2000, 4000, 8000, 16000, 32000}
+)
+
 // NewClient creates a new wrapper based on the environment.
-func NewClient(config *ClientConfig, client dynamodbiface.DynamoDBAPI) (*Client, error) {
-	log.Println("Creating live DynamoDB client")
-
+func NewClient(config *ClientConfig, isDevelopment bool, developmentLogMessageHandler func(string), client dynamodbiface.DynamoDBAPI) (*Client, error) {
 	if client == nil {
-		var dynamoDBClient *dynamoDBLib.DynamoDB
+		client = dynamoDBLib.New(session.New())
 
-		dynamoDBClient = dynamoDBLib.New(session.New())
+		if isDevelopment {
+			err := testConnection(config.DynamoDBEndpoint, developmentBackoffIntervals, developmentLogMessageHandler)
+			if err != nil {
+				return nil, err
+			}
 
-		return &Client{
-			dynamoDBClient,
-			config,
-		}, nil
+			client = dynamoDBLib.New(
+				session.New(),
+				aws.NewConfig().WithEndpoint(config.DynamoDBEndpoint),
+			)
+		}
 	}
 
 	return &Client{
@@ -47,31 +52,10 @@ func NewClient(config *ClientConfig, client dynamodbiface.DynamoDBAPI) (*Client,
 	}, nil
 }
 
-// NewDevelopmentClient acts the same as NewClient() however contains logic to
-// backoff the connection to the DynamoDB store.
-func NewDevelopmentClient(config *ClientConfig, backoffIntervals *[]int, logPrefix *string) (*Client, error) {
-	log.Println("Creating development DynamoDB client")
-
-	err := testConnection(config.DynamoDBEndpoint, *backoffIntervals, *logPrefix)
-	if err != nil {
-		return nil, err
-	}
-
-	dynamoDBClient := dynamoDBLib.New(
-		session.New(),
-		aws.NewConfig().WithEndpoint(config.DynamoDBEndpoint),
-	)
-
-	return &Client{
-		dynamoDBClient,
-		config,
-	}, nil
-}
-
-func testConnection(endpoint string, backoffIntervals []int, logPrefix string) error {
+func testConnection(endpoint string, backoffIntervals []int, developmentLogMessageHandler func(string)) error {
 	bp := backoff.Policy{
-		Intervals: backoffIntervals,
-		LogPrefix: logPrefix,
+		Intervals:         backoffIntervals,
+		LogMessageHandler: developmentLogMessageHandler,
 	}
 
 	parsedURL, err := url.Parse(endpoint)

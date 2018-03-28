@@ -83,8 +83,8 @@
 [[projects]]
   name = "github.com/vidsy/backoff"
   packages = ["."]
-  revision = "77ce9f10c02d6c3a70317078bbf796d7c6a29b04"
-  version = "2.0.0"
+  revision = "908c7d03e582f80df6143e9b29f3ed934f6e4e9f"
+  version = "3.0.0"
 
 [[projects]]
   name = "github.com/vidsy/go-kmsconfig"
@@ -95,6 +95,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "52d706c478f4f6b72abfe45a777dd9848c9e330396474a53f2b559e3f1f4d548"
+  inputs-digest = "b27fcbf1ff30000823915e53f15def2c8e1afcb1e07c075ba4ed0e4b16166518"
   solver-name = "gps-cdcl"
   solver-version = 1
