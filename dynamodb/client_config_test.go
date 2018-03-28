@@ -22,7 +22,7 @@ func TestClientConfig(t *testing.T) {
 				valueType string
 				key       string
 			}{
-				{"string", "dynamo_db_endpoint"},
+				{"string", "endpoint"},
 			}
 
 			for _, errorCase := range errorCases {
