@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net"
 	"net/url"
+	"runtime"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -104,4 +106,64 @@ func (c Client) Query(input *dynamoDBLib.QueryInput, bindModel interface{}) (*dy
 	}
 
 	return output, nil
+}
+
+// Scan extends the underlying scan with pages functionality and automatically
+// creates a set of parellel requests and binds the result to the given struct
+// or returns an error.
+func (c Client) Scan(params dynamoDBLib.ScanInput, bindModel interface{}) error {
+	errChan := make(chan error)
+	itemsChan := make(chan map[string]*dynamoDBLib.AttributeValue)
+	items := []map[string]*dynamoDBLib.AttributeValue{}
+	var scanQueriesWaitGroup sync.WaitGroup
+
+	if *params.TotalSegments == 0 {
+		params.TotalSegments = aws.Int64(int64(runtime.NumCPU()))
+	}
+
+	scanQueriesWaitGroup.Add(int(*params.TotalSegments))
+
+	for i := int64(0); i < *params.TotalSegments; i++ {
+		go c.scanWorker(params, itemsChan, errChan, i, &scanQueriesWaitGroup)
+	}
+
+	go func(errChan chan error) {
+		scanQueriesWaitGroup.Wait()
+		errChan <- nil
+	}(errChan)
+
+	for {
+		select {
+		case item := <-itemsChan:
+			items = append(items, item)
+		case err := <-errChan:
+			if err != nil {
+				return err
+			}
+
+			err = dynamodbattribute.UnmarshalListOfMaps(items, &bindModel)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+}
+
+func (c Client) scanWorker(params dynamoDBLib.ScanInput, itemsChan chan map[string]*dynamoDBLib.AttributeValue, errChan chan error, segment int64, scanQueriesWaitGroup *sync.WaitGroup) {
+	defer scanQueriesWaitGroup.Done()
+	params.Segment = aws.Int64(segment)
+
+	err := c.DynamoDBAPI.ScanPages(&params, func(result *dynamoDBLib.ScanOutput, lastPage bool) bool {
+		for _, item := range result.Items {
+			itemsChan <- item
+		}
+
+		return lastPage
+	})
+
+	if err != nil {
+		errChan <- err
+	}
 }
