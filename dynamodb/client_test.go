@@ -81,7 +81,7 @@ func TestClient(t *testing.T) {
 		t.Run("BindsModelData", func(t *testing.T) {
 			mockSDKClient := &MockSDKClient{
 				mockScanPages: func(input *dynamoDBLib.ScanInput, pageFunc func(*dynamoDBLib.ScanOutput, bool) bool) error {
-					fooValue := fmt.Sprintf("foo_%s", input.Segment)
+					fooValue := fmt.Sprintf("foo_%d", input.Segment)
 
 					output := &dynamoDBLib.ScanOutput{
 						Items: []map[string]*dynamoDBLib.AttributeValue{
