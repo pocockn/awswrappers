@@ -1,7 +1,7 @@
 package dynamodb
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"net"
 	"net/url"
 	"runtime"
@@ -79,6 +79,26 @@ func testConnection(endpoint string, backoffIntervals []int, developmentLogMessa
 	}
 
 	return nil
+}
+
+// DeleteItem extends the default clients DeleteItem taking a struct that implements
+// the Deletable interface.
+func (c Client) DeleteItem(item Deletable) (*dynamoDBLib.DeleteItemOutput, error) {
+	key, err := dynamodbattribute.MarshalMap(item.Key())
+	if err != nil {
+		return nil, errors.Wrapf(
+			err,
+			"Problem marshaling key:%s to AttributeValue.",
+			key,
+		)
+	}
+
+	deleteItemInput := &dynamoDBLib.DeleteItemInput{
+		Key:       key,
+		TableName: aws.String(item.TableName()),
+	}
+
+	return c.DynamoDBAPI.DeleteItem(deleteItemInput)
 }
 
 // PutItem extends the default clients PutItem taking a struct that implements
