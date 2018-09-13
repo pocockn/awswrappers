@@ -5,8 +5,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	s3Lib "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
-
-	"log"
 )
 
 type (
@@ -23,7 +21,6 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client s3iface.S
 		var s3Client *s3Lib.S3
 
 		if useDevelopmentClient {
-			log.Println("Creating development S3 client")
 			config := &aws.Config{
 				Endpoint:         aws.String(config.Endpoint),
 				S3ForcePathStyle: aws.Bool(true),

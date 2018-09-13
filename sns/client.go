@@ -5,8 +5,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	snsLib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/aws/aws-sdk-go/service/sns/snsiface"
-
-	"log"
 )
 
 const (
@@ -33,7 +31,6 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client snsiface.
 		var snsClient *snsLib.SNS
 
 		if useDevelopmentClient {
-			log.Println("Creating development sns client")
 			snsClient = snsLib.New(session.New(), aws.NewConfig().WithEndpoint(config.Endpoint))
 		} else {
 			snsClient = snsLib.New(session.New())

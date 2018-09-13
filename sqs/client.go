@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 
 	"fmt"
-	"log"
 )
 
 type (
@@ -31,7 +30,6 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client sqsiface.
 		var sqsClient *sqsLib.SQS
 
 		if useDevelopmentClient {
-			log.Println("Creating development SQS client")
 			sqsClient = sqsLib.New(session.New(), aws.NewConfig().WithEndpoint(config.QueueEndpoint))
 		} else {
 			sqsClient = sqsLib.New(session.New())

@@ -2,6 +2,7 @@
 
 
 [[projects]]
+  digest = "1:09ae7cc27ecc898ddf555fb599967cf9e650a4afe5d7e741e7832595f2436c8e"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -14,6 +15,7 @@
     "aws/credentials/ec2rolecreds",
     "aws/credentials/endpointcreds",
     "aws/credentials/stscreds",
+    "aws/csm",
     "aws/defaults",
     "aws/ec2metadata",
     "aws/endpoints",
@@ -22,8 +24,11 @@
     "aws/signer/v4",
     "internal/sdkio",
     "internal/sdkrand",
+    "internal/sdkuri",
     "internal/shareddefaults",
     "private/protocol",
+    "private/protocol/eventstream",
+    "private/protocol/eventstream/eventstreamapi",
     "private/protocol/json/jsonutil",
     "private/protocol/jsonrpc",
     "private/protocol/query",
@@ -47,61 +52,101 @@
     "service/sns/snsiface",
     "service/sqs",
     "service/sqs/sqsiface",
-    "service/sts"
+    "service/sts",
   ]
-  revision = "bb206ce0d6a50da7807694a823aed5c601c57ce0"
-  version = "v1.13.23"
+  pruneopts = "T"
+  revision = "10d5f1478e28a17062fd79617a8022f5499462d5"
+  version = "v1.15.34"
 
 [[projects]]
+  digest = "1:52f195ad0e20a92d8604c1ba3cd246c61644c03eaa454b5acd41be89841e0d10"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = "T"
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:ebebbee1c570532364c4a18b0642de6482d64647152dc0c88a30270cffd7716e"
   name = "github.com/go-ini/ini"
   packages = ["."]
+  pruneopts = "T"
   revision = "6333e38ac20b8949a8dd68baa3650f4dee8f39f0"
   version = "v1.33.0"
 
 [[projects]]
+  digest = "1:eebce3c1fad57b604c517ea649edd5dcbd2530f0f7e62ac0b7b232f2eacbcc88"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
+  pruneopts = "T"
   revision = "0b12d6b5"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = "T"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
 [[projects]]
+  digest = "1:22aa691fe0213cb5c07d103f9effebcb7ad04bee45a0ce5fe5369d0ca2ec3a1f"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = "T"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:2a3eb3dd47e1f22625488dce56ff3da2813abe6e91ab2caf02a8a1b2ec118b30"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
+  pruneopts = "T"
   revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
   version = "v1.1.4"
 
 [[projects]]
+  digest = "1:e54ada9794d22b2ce838651ccafc54e0f635f77a3ed0c9091e80a2d3dd86cdad"
   name = "github.com/vidsy/backoff"
   packages = ["."]
+  pruneopts = "T"
   revision = "908c7d03e582f80df6143e9b29f3ed934f6e4e9f"
   version = "3.0.0"
 
 [[projects]]
+  digest = "1:32fd98ea41a8e390a43a3e093cedfe1498276e2dbe7599c54c4cecf9f2e6a81b"
   name = "github.com/vidsy/go-kmsconfig"
   packages = ["kmsconfig"]
-  revision = "702fb50001fb17b08be0ae031ee723ced0b64ee7"
-  version = "3.1.0"
+  pruneopts = "T"
+  revision = "073c6e7edae23c6c76acd82ee84aeb54d00566b6"
+  version = "4.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "453c42eb49255e4f920ea92dd66bf3eb63704167e02afb8a9a882e2e2dbd6d2d"
+  input-imports = [
+    "github.com/aws/aws-sdk-go/aws",
+    "github.com/aws/aws-sdk-go/aws/request",
+    "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/dynamodb",
+    "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute",
+    "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface",
+    "github.com/aws/aws-sdk-go/service/elastictranscoder",
+    "github.com/aws/aws-sdk-go/service/elastictranscoder/elastictranscoderiface",
+    "github.com/aws/aws-sdk-go/service/kms",
+    "github.com/aws/aws-sdk-go/service/kms/kmsiface",
+    "github.com/aws/aws-sdk-go/service/s3",
+    "github.com/aws/aws-sdk-go/service/s3/s3iface",
+    "github.com/aws/aws-sdk-go/service/ses",
+    "github.com/aws/aws-sdk-go/service/ses/sesiface",
+    "github.com/aws/aws-sdk-go/service/sns",
+    "github.com/aws/aws-sdk-go/service/sns/snsiface",
+    "github.com/aws/aws-sdk-go/service/sqs",
+    "github.com/aws/aws-sdk-go/service/sqs/sqsiface",
+    "github.com/pkg/errors",
+    "github.com/stretchr/testify/assert",
+    "github.com/vidsy/backoff",
+    "github.com/vidsy/go-kmsconfig/kmsconfig",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

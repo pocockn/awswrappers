@@ -2,7 +2,6 @@ package elastictranscoder
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -24,7 +23,6 @@ func NewClient(config *ClientConfig, useDevelopmentClient bool, client elastictr
 		var elastictranscoderClient *elastictranscoderLib.ElasticTranscoder
 
 		if useDevelopmentClient {
-			log.Println("Creating development elastictranscoder client")
 			elastictranscoderClient = elastictranscoderLib.New(session.New(), aws.NewConfig().WithEndpoint(config.Endpoint))
 		} else {
 			elastictranscoderClient = elastictranscoderLib.New(session.New())

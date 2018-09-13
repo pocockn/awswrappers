@@ -12,7 +12,7 @@
 
 [[constraint]]
   name = "github.com/vidsy/go-kmsconfig"
-  version = "3.1.0"
+  version = "4.0.0"
 
 [[constraint]]
   name = "github.com/pkg/errors"
