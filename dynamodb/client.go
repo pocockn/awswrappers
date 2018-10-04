@@ -1,11 +1,13 @@
 package dynamodb
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 	"net"
 	"net/url"
 	"runtime"
 	"sync"
+
+	"github.com/pkg/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -79,6 +81,21 @@ func testConnection(endpoint string, backoffIntervals []int, developmentLogMessa
 	}
 
 	return nil
+}
+
+// BatchGetItem extends the default clients BatchGetItem.
+func (c Client) BatchGetItem(tableName string, batchGetItem BatchGetItem) (*dynamoDBLib.BatchGetItemOutput, error) {
+	attributeValues := marshalValuesIntoAttributeValues(batchGetItem)
+
+	batchGetItemInput := &dynamoDBLib.BatchGetItemInput{
+		RequestItems: map[string]*dynamoDBLib.KeysAndAttributes{
+			tableName: {
+				Keys: attributeValues,
+			},
+		},
+	}
+
+	return c.DynamoDBAPI.BatchGetItem(batchGetItemInput)
 }
 
 // DeleteItem extends the default clients DeleteItem taking a struct that implements
@@ -186,4 +203,28 @@ func (c Client) scanWorker(params dynamoDBLib.ScanInput, itemsChan chan map[stri
 	if err != nil {
 		errChan <- err
 	}
+}
+
+func marshalValuesIntoAttributeValues(batchGetItem BatchGetItem) []map[string]*dynamoDBLib.AttributeValue {
+	var attributeKeyValueSlice []map[string]*dynamoDBLib.AttributeValue
+
+	for primaryKey, attributeValues := range batchGetItem {
+		for _, attributeValue := range attributeValues {
+			attributeKeyValue := make(map[string]*dynamoDBLib.AttributeValue)
+			switch castValue := attributeValue.(type) {
+			case int, int8, int16, int32, int64, float32, float64:
+				stringNumberValue := fmt.Sprintf("%s", castValue)
+				attributeKeyValue[primaryKey] = &dynamoDBLib.AttributeValue{N: aws.String(stringNumberValue)}
+			case string:
+				attributeKeyValue[primaryKey] = &dynamoDBLib.AttributeValue{S: aws.String(castValue)}
+			}
+
+			attributeKeyValueSlice = append(
+				attributeKeyValueSlice,
+				attributeKeyValue,
+			)
+		}
+	}
+
+	return attributeKeyValueSlice
 }

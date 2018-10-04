@@ -15,13 +15,22 @@ import (
 type (
 	MockSDKClient struct {
 		dynamodbiface.DynamoDBAPI
-		mockScanPages func(*dynamoDBLib.ScanInput, func(*dynamoDBLib.ScanOutput, bool) bool) error
+		mockBatchGetItem func(*dynamoDBLib.BatchGetItemInput) (*dynamoDBLib.BatchGetItemOutput, error)
+		mockScanPages    func(*dynamoDBLib.ScanInput, func(*dynamoDBLib.ScanOutput, bool) bool) error
 	}
 
 	TestModel struct {
 		Foo string `dynamodbav:"foo"`
 	}
 )
+
+func (m MockSDKClient) BatchGetItem(batchGetItem *dynamoDBLib.BatchGetItemInput) (*dynamoDBLib.BatchGetItemOutput, error) {
+	if m.mockBatchGetItem != nil {
+		return m.mockBatchGetItem(batchGetItem)
+	}
+
+	return nil, nil
+}
 
 func (m MockSDKClient) ScanPages(input *dynamoDBLib.ScanInput, pageFunc func(*dynamoDBLib.ScanOutput, bool) bool) error {
 	if m.mockScanPages != nil {
@@ -122,4 +131,73 @@ func TestClient(t *testing.T) {
 			assert.NotNil(t, err)
 		})
 	})
+
+	t.Run("ReturnsSliceOfAttributeValues", func(t *testing.T) {
+		tableName := "foo"
+
+		attributeKeyValues := make(map[string][]interface{})
+		attributeKeyValues[tableName] = append(
+			attributeKeyValues[tableName],
+			"some_value",
+			"some_other_value",
+		)
+
+		batchItemOutput := buildBatchGetItemOutput(tableName, attributeKeyValues)
+
+		data := dynamodb.BatchGetItem{
+			"some_key": []interface{}{
+				"some_value",
+				"some_other_value",
+			},
+		}
+
+		mockSDKClient := &MockSDKClient{
+			mockBatchGetItem: func(input *dynamoDBLib.BatchGetItemInput) (*dynamoDBLib.BatchGetItemOutput, error) {
+				requestItems := input.RequestItems
+
+				assert.Contains(t, requestItems, "foo")
+				assert.Len(t, requestItems["foo"].Keys, 2)
+				assert.Contains(t, requestItems["foo"].Keys[0], "some_key")
+				assert.Contains(t, requestItems["foo"].Keys[1], "some_key")
+
+				firstItem := requestItems["foo"].Keys[0]["some_key"].S
+				secondItem := requestItems["foo"].Keys[1]["some_key"].S
+				assert.Equal(t, "some_value", *firstItem)
+				assert.Equal(t, "some_other_value", *secondItem)
+
+				return &batchItemOutput, nil
+			},
+		}
+
+		testClient, err := NewTestClient(mockSDKClient)
+		assert.Nil(t, err)
+
+		output, err := testClient.BatchGetItem(tableName, data)
+
+		assert.NoError(t, err)
+		assert.Equal(t, output.GoString(), batchItemOutput.GoString())
+	})
+}
+
+func buildBatchGetItemOutput(tableName string, attributeKeyValues map[string][]interface{}) dynamoDBLib.BatchGetItemOutput {
+	responses := make(map[string][]map[string]*dynamoDBLib.AttributeValue)
+	responses[tableName] = make([]map[string]*dynamoDBLib.AttributeValue, 0)
+
+	for key, values := range attributeKeyValues {
+		for _, value := range values {
+			responses[tableName] = append(
+				responses[tableName],
+				map[string]*dynamoDBLib.AttributeValue{
+					key: &dynamoDBLib.AttributeValue{
+						S: aws.String(value.(string)),
+					},
+				},
+			)
+		}
+	}
+	batchItemOutput := dynamoDBLib.BatchGetItemOutput{
+		Responses: responses,
+	}
+
+	return batchItemOutput
 }
