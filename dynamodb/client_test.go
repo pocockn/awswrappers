@@ -136,110 +136,7 @@ func TestClient(t *testing.T) {
 		})
 	})
 
-	t.Run("ReturnsSliceOfAttributeValues", func(t *testing.T) {
-		tableName := "test_table_name"
-
-		attributeKeyValues := make(map[string][]interface{})
-		attributeKeyValues["id"] = append(
-			attributeKeyValues["id"],
-			"some_value",
-		)
-		attributeKeyValues["id"] = append(
-			attributeKeyValues["id"],
-			"some_other_value",
-		)
-
-		batchItemOutput := buildBatchGetItemOutput(tableName, attributeKeyValues)
-
-		data := dynamodb.BatchGetItem{
-			"id": []interface{}{
-				"some_value",
-				"some_other_value",
-			},
-		}
-
-		mockSDKClient := &MockSDKClient{
-			mockBatchGetItemPages: func(input *dynamoDBLib.BatchGetItemInput, paginationFunction func(page *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool) error {
-				requestItems := input.RequestItems
-
-				assert.Contains(t, requestItems, tableName)
-				assert.Len(t, requestItems[tableName].Keys, 2)
-				assert.Contains(t, requestItems[tableName].Keys[0], "id")
-				assert.Contains(t, requestItems[tableName].Keys[1], "id")
-
-				firstItem := requestItems[tableName].Keys[0]["id"].S
-				secondItem := requestItems[tableName].Keys[1]["id"].S
-				assert.Equal(t, "some_value", *firstItem)
-				assert.Equal(t, "some_other_value", *secondItem)
-
-				paginationFunction(&batchItemOutput, true)
-				return nil
-			},
-		}
-
-		testClient, err := NewTestClient(mockSDKClient)
-		assert.Nil(t, err)
-
-		var bindModel []TestBatchGetModel
-
-		err = testClient.BatchGetItem(tableName, data, &bindModel)
-		assert.NoError(t, err)
-
-		assert.Len(t, bindModel, 2)
-		assert.Equal(t, "some_value", bindModel[0].ID)
-		assert.Equal(t, "some_other_value", bindModel[1].ID)
-	})
-
-	t.Run("BatchGetItemPagination", func(t *testing.T) {
-		tableName := "test_table_name"
-
-		attributeKeyValuesPage1 := make(map[string][]interface{})
-		attributeKeyValuesPage1["id"] = append(
-			attributeKeyValuesPage1["id"],
-			"some_value",
-		)
-		batchItemOutputPage1 := buildBatchGetItemOutput(tableName, attributeKeyValuesPage1)
-
-		attributeKeyValuesPage2 := make(map[string][]interface{})
-		attributeKeyValuesPage2["id"] = append(
-			attributeKeyValuesPage2["id"],
-			"some_other_value",
-		)
-		batchItemOutputPage2 := buildBatchGetItemOutput(tableName, attributeKeyValuesPage2)
-
-		data := dynamodb.BatchGetItem{
-			"id": []interface{}{
-				"some_value",
-				"some_other_value",
-			},
-		}
-
-		var paginationCount int
-		mockSDKClient := &MockSDKClient{
-			mockBatchGetItemPages: func(input *dynamoDBLib.BatchGetItemInput, paginationFunction func(page *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool) error {
-				paginationFunction(&batchItemOutputPage1, false)
-				paginationCount++
-				paginationFunction(&batchItemOutputPage2, true)
-				paginationCount++
-				return nil
-			},
-		}
-
-		testClient, err := NewTestClient(mockSDKClient)
-		assert.Nil(t, err)
-
-		var bindModel []TestBatchGetModel
-
-		err = testClient.BatchGetItem(tableName, data, &bindModel)
-		assert.NoError(t, err)
-		assert.Equal(t, "some_value", bindModel[0].ID)
-		assert.Equal(t, "some_other_value", bindModel[1].ID)
-
-		assert.Equal(t, paginationCount, 2)
-
-	})
-
-	t.Run("BatchGetItemReturnsOnError", func(t *testing.T) {
+	t.Run(".BatchGetItem()", func(t *testing.T) {
 		tableName := "test_table_name"
 
 		data := dynamodb.BatchGetItem{
@@ -249,17 +146,104 @@ func TestClient(t *testing.T) {
 			},
 		}
 
-		mockSDKClient := &MockSDKClient{
-			mockBatchGetItemPages: func(input *dynamoDBLib.BatchGetItemInput, paginationFunction func(page *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool) error {
-				return errors.New("Batch get item pages error.")
-			},
-		}
+		t.Run("ReturnsSliceOfAttributeValues", func(t *testing.T) {
+			attributeKeyValues := make(map[string][]interface{})
+			attributeKeyValues["id"] = append(
+				attributeKeyValues["id"],
+				"some_value",
+			)
+			attributeKeyValues["id"] = append(
+				attributeKeyValues["id"],
+				"some_other_value",
+			)
 
-		testClient, err := NewTestClient(mockSDKClient)
-		assert.Nil(t, err)
+			batchItemOutput := buildBatchGetItemOutput(tableName, attributeKeyValues)
 
-		err = testClient.BatchGetItem(tableName, data, nil)
-		assert.Error(t, err, "Batch get item pages error.")
+			mockSDKClient := &MockSDKClient{
+				mockBatchGetItemPages: func(input *dynamoDBLib.BatchGetItemInput, paginationFunction func(page *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool) error {
+					requestItems := input.RequestItems
+
+					assert.Contains(t, requestItems, tableName)
+					assert.Len(t, requestItems[tableName].Keys, 2)
+					assert.Contains(t, requestItems[tableName].Keys[0], "id")
+					assert.Contains(t, requestItems[tableName].Keys[1], "id")
+
+					firstItem := requestItems[tableName].Keys[0]["id"].S
+					secondItem := requestItems[tableName].Keys[1]["id"].S
+					assert.Equal(t, "some_value", *firstItem)
+					assert.Equal(t, "some_other_value", *secondItem)
+
+					paginationFunction(&batchItemOutput, true)
+					return nil
+				},
+			}
+
+			testClient, err := NewTestClient(mockSDKClient)
+			assert.Nil(t, err)
+
+			var bindModel []TestBatchGetModel
+
+			err = testClient.BatchGetItem(tableName, data, &bindModel)
+			assert.NoError(t, err)
+
+			assert.Len(t, bindModel, 2)
+			assert.Equal(t, "some_value", bindModel[0].ID)
+			assert.Equal(t, "some_other_value", bindModel[1].ID)
+		})
+
+		t.Run("BatchGetItemPagination", func(t *testing.T) {
+			attributeKeyValuesPage1 := make(map[string][]interface{})
+			attributeKeyValuesPage1["id"] = append(
+				attributeKeyValuesPage1["id"],
+				"some_value",
+			)
+			batchItemOutputPage1 := buildBatchGetItemOutput(tableName, attributeKeyValuesPage1)
+
+			attributeKeyValuesPage2 := make(map[string][]interface{})
+			attributeKeyValuesPage2["id"] = append(
+				attributeKeyValuesPage2["id"],
+				"some_other_value",
+			)
+			batchItemOutputPage2 := buildBatchGetItemOutput(tableName, attributeKeyValuesPage2)
+
+			var paginationCount int
+			mockSDKClient := &MockSDKClient{
+				mockBatchGetItemPages: func(input *dynamoDBLib.BatchGetItemInput, paginationFunction func(page *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool) error {
+					paginationFunction(&batchItemOutputPage1, false)
+					paginationCount++
+					paginationFunction(&batchItemOutputPage2, true)
+					paginationCount++
+					return nil
+				},
+			}
+
+			testClient, err := NewTestClient(mockSDKClient)
+			assert.Nil(t, err)
+
+			var bindModel []TestBatchGetModel
+
+			err = testClient.BatchGetItem(tableName, data, &bindModel)
+			assert.NoError(t, err)
+			assert.Equal(t, "some_value", bindModel[0].ID)
+			assert.Equal(t, "some_other_value", bindModel[1].ID)
+
+			assert.Equal(t, paginationCount, 2)
+
+		})
+
+		t.Run("BatchGetItemReturnsOnError", func(t *testing.T) {
+			mockSDKClient := &MockSDKClient{
+				mockBatchGetItemPages: func(input *dynamoDBLib.BatchGetItemInput, paginationFunction func(page *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool) error {
+					return errors.New("Batch get item pages error.")
+				},
+			}
+
+			testClient, err := NewTestClient(mockSDKClient)
+			assert.Nil(t, err)
+
+			err = testClient.BatchGetItem(tableName, data, nil)
+			assert.Error(t, err, "Batch get item pages error.")
+		})
 	})
 }
 
