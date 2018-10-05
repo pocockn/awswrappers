@@ -84,9 +84,8 @@ func testConnection(endpoint string, backoffIntervals []int, developmentLogMessa
 }
 
 // BatchGetItem extends the default clients BatchGetItem.
-func (c Client) BatchGetItem(tableName string, batchGetItem BatchGetItem) (*dynamoDBLib.BatchGetItemOutput, error) {
+func (c Client) BatchGetItem(tableName string, batchGetItem BatchGetItem, bindModel interface{}) error {
 	attributeValues := marshalValuesIntoAttributeValues(batchGetItem)
-
 	batchGetItemInput := &dynamoDBLib.BatchGetItemInput{
 		RequestItems: map[string]*dynamoDBLib.KeysAndAttributes{
 			tableName: {
@@ -95,7 +94,26 @@ func (c Client) BatchGetItem(tableName string, batchGetItem BatchGetItem) (*dyna
 		},
 	}
 
-	return c.DynamoDBAPI.BatchGetItem(batchGetItemInput)
+	results := make([]map[string]*dynamoDBLib.AttributeValue, 0)
+
+	err := c.DynamoDBAPI.BatchGetItemPages(batchGetItemInput, func(output *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool {
+		results = append(
+			results,
+			output.Responses[tableName]...,
+		)
+
+		return lastPage
+	})
+	if err != nil {
+		return errors.Errorf("Unable to fetch batch items for table; %s", tableName)
+	}
+
+	err = dynamodbattribute.UnmarshalListOfMaps(results, &bindModel)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeleteItem extends the default clients DeleteItem taking a struct that implements
