@@ -17,6 +17,10 @@ import (
 	"github.com/vidsy/backoff"
 )
 
+const (
+	batchGetMaxItems = 100
+)
+
 type (
 	// ClientWrapper interface for client wrapping DynamoDB.
 	ClientWrapper interface{}
@@ -86,35 +90,45 @@ func testConnection(endpoint string, backoffIntervals []int, developmentLogMessa
 // BatchGetItem extends the default clients BatchGetItem.
 func (c Client) BatchGetItem(tableName string, batchGetItem BatchGetItem, bindModel interface{}) error {
 	attributeValues := marshalValuesIntoAttributeValues(batchGetItem)
-	batchGetItemInput := &dynamoDBLib.BatchGetItemInput{
-		RequestItems: map[string]*dynamoDBLib.KeysAndAttributes{
-			tableName: {
-				Keys: attributeValues,
+
+	for i := 0; i < len(attributeValues); i += batchGetMaxItems {
+		from := i
+		to := i + batchGetMaxItems
+		if to > len(attributeValues) {
+			to = len(attributeValues)
+		}
+
+		batchGetItemInput := &dynamoDBLib.BatchGetItemInput{
+			RequestItems: map[string]*dynamoDBLib.KeysAndAttributes{
+				tableName: {
+					Keys: attributeValues[from:to],
+				},
 			},
-		},
-	}
+		}
 
-	results := make([]map[string]*dynamoDBLib.AttributeValue, 0)
+		results := make([]map[string]*dynamoDBLib.AttributeValue, 0)
 
-	err := c.DynamoDBAPI.BatchGetItemPages(batchGetItemInput, func(output *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool {
-		results = append(
-			results,
-			output.Responses[tableName]...,
-		)
+		err := c.DynamoDBAPI.BatchGetItemPages(batchGetItemInput, func(output *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool {
+			results = append(
+				results,
+				output.Responses[tableName]...,
+			)
 
-		return lastPage
-	})
-	if err != nil {
-		return errors.Wrapf(
-			err,
-			"Unable to fetch batch items for DynamoDB table: '%s'",
-			tableName,
-		)
-	}
+			return lastPage
+		})
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"Unable to fetch batch items for DynamoDB table: '%s'",
+				tableName,
+			)
+		}
 
-	err = dynamodbattribute.UnmarshalListOfMaps(results, &bindModel)
-	if err != nil {
-		return err
+		err = dynamodbattribute.UnmarshalListOfMaps(results, &bindModel)
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return nil

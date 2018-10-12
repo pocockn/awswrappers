@@ -191,6 +191,67 @@ func TestClient(t *testing.T) {
 			assert.Equal(t, "some_other_value", bindModel[1].ID)
 		})
 
+		t.Run("ReturnsSliceOfAttributeValuesGeneratingMultipleRequests", func(t *testing.T) {
+			attributeKeyValues := make(map[string][]interface{})
+			newData := dynamodb.BatchGetItem{
+				"id": []interface{}{},
+			}
+
+			for i := 0; i < 105; i++ {
+				attributeKeyValues["id"] = append(
+					attributeKeyValues["id"],
+					fmt.Sprintf("%d_some_value", i),
+				)
+				newData["id"] = append(newData["id"], fmt.Sprintf("%d_some_value", i))
+			}
+
+			batchItemOutput := buildBatchGetItemOutput(tableName, attributeKeyValues)
+			clientCallCount := 0
+
+			mockSDKClient := &MockSDKClient{
+				mockBatchGetItemPages: func(input *dynamoDBLib.BatchGetItemInput, paginationFunction func(page *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool) error {
+					requestItems := input.RequestItems
+
+					assert.Contains(t, requestItems, tableName)
+					if clientCallCount == 0 {
+						assert.Len(t, requestItems[tableName].Keys, 100)
+					} else {
+						assert.Len(t, requestItems[tableName].Keys, 5)
+					}
+
+					assert.Contains(t, requestItems[tableName].Keys[0], "id")
+					assert.Contains(t, requestItems[tableName].Keys[1], "id")
+
+					firstItem := requestItems[tableName].Keys[0]["id"].S
+					secondItem := requestItems[tableName].Keys[1]["id"].S
+					if clientCallCount == 0 {
+						assert.Equal(t, "0_some_value", *firstItem)
+						assert.Equal(t, "1_some_value", *secondItem)
+					} else {
+						assert.Equal(t, "100_some_value", *firstItem)
+						assert.Equal(t, "101_some_value", *secondItem)
+					}
+
+					paginationFunction(&batchItemOutput, true)
+					clientCallCount++
+					return nil
+				},
+			}
+
+			testClient, err := NewTestClient(mockSDKClient)
+			assert.Nil(t, err)
+
+			var bindModel []TestBatchGetModel
+
+			err = testClient.BatchGetItem(tableName, newData, &bindModel)
+			assert.NoError(t, err)
+
+			assert.Len(t, bindModel, 105)
+			assert.Equal(t, "0_some_value", bindModel[0].ID)
+			assert.Equal(t, "1_some_value", bindModel[1].ID)
+			assert.Equal(t, 2, clientCallCount)
+		})
+
 		t.Run("BatchGetItemPagination", func(t *testing.T) {
 			attributeKeyValuesPage1 := make(map[string][]interface{})
 			attributeKeyValuesPage1["id"] = append(
