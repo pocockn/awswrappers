@@ -105,7 +105,11 @@ func (c Client) BatchGetItem(tableName string, batchGetItem BatchGetItem, bindMo
 		return lastPage
 	})
 	if err != nil {
-		return errors.Errorf("Unable to fetch batch items for table; %s", tableName)
+		return errors.Wrapf(
+			err,
+			"Unable to fetch batch items for DynamoDB table: '%s'",
+			tableName,
+		)
 	}
 
 	err = dynamodbattribute.UnmarshalListOfMaps(results, &bindModel)
