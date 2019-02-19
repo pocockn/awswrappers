@@ -33,7 +33,7 @@ func NewClient(client sesiface.SESAPI) *Client {
 
 // SendEmailMessage sends an email to the given recipient(s) and returns the message
 // ID.
-func (c Client) SendEmailMessage(recipients []string, from string, subject string, plainBody string, htmlBody string) (string, error) {
+func (c Client) SendEmailMessage(recipients []string, from string, subject string, plainBody string, htmlBody string, replyTo string) (string, error) {
 	destination := &sesLib.Destination{
 		ToAddresses: aws.StringSlice(recipients),
 	}
@@ -58,7 +58,7 @@ func (c Client) SendEmailMessage(recipients []string, from string, subject strin
 	params := &sesLib.SendEmailInput{
 		Destination:      destination,
 		Message:          message,
-		ReplyToAddresses: aws.StringSlice([]string{from}),
+		ReplyToAddresses: aws.StringSlice([]string{replyTo}),
 		Source:           aws.String(from),
 	}
 

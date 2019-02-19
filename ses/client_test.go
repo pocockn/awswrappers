@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"errors"
+
 	"github.com/aws/aws-sdk-go/aws"
 	sesLib "github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
@@ -48,11 +49,12 @@ func TestClient(t *testing.T) {
 
 			client := NewTestClient(mockClient)
 			sendEmailID, err := client.SendEmailMessage(
-				[]string{"test@test.com"},
-				"hello@test.com",
+				[]string{"im_a_creator@example.com"},
+				"admin@vidsy.com",
 				"An email",
 				"Plain body",
 				"<b>Html body</b>",
+				"vidsy@intercom.com",
 			)
 
 			if err != nil {
@@ -73,11 +75,12 @@ func TestClient(t *testing.T) {
 
 			client := NewTestClient(mockClient)
 			_, err := client.SendEmailMessage(
-				[]string{"test@test.com"},
-				"hello@test.com",
+				[]string{"im_a_creator@example.com"},
+				"admin@vidsy.com",
 				"An email",
 				"Plain body",
 				"<b>Html body</b>",
+				"vidsy@intercom.com",
 			)
 
 			if err == nil {
