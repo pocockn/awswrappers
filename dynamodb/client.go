@@ -90,45 +90,40 @@ func testConnection(endpoint string, backoffIntervals []int, developmentLogMessa
 // BatchGetItem extends the default clients BatchGetItem.
 func (c Client) BatchGetItem(tableName string, batchGetItem BatchGetItem, bindModel interface{}) error {
 	attributeValues := marshalValuesIntoAttributeValues(batchGetItem)
+	results := make([]map[string]*dynamoDBLib.AttributeValue, 0)
 
 	for i := 0; i < len(attributeValues); i += batchGetMaxItems {
-		from := i
-		to := i + batchGetMaxItems
-		if to > len(attributeValues) {
-			to = len(attributeValues)
+		end := i + batchGetMaxItems
+
+		if end > len(attributeValues) {
+			end = len(attributeValues)
 		}
 
 		batchGetItemInput := &dynamoDBLib.BatchGetItemInput{
 			RequestItems: map[string]*dynamoDBLib.KeysAndAttributes{
 				tableName: {
-					Keys: attributeValues[from:to],
+					Keys: attributeValues[i:end],
 				},
 			},
 		}
 
-		results := make([]map[string]*dynamoDBLib.AttributeValue, 0)
-
-		err := c.DynamoDBAPI.BatchGetItemPages(batchGetItemInput, func(output *dynamoDBLib.BatchGetItemOutput, lastPage bool) bool {
-			results = append(
-				results,
-				output.Responses[tableName]...,
-			)
-
-			return lastPage
-		})
+		output, err := c.DynamoDBAPI.BatchGetItem(batchGetItemInput)
 		if err != nil {
 			return errors.Wrapf(
 				err,
-				"Unable to fetch batch items for DynamoDB table: '%s'",
+				"Error fetching BatchGetItem table '%s', range %d:%d",
 				tableName,
+				i,
+				end,
 			)
 		}
 
-		err = dynamodbattribute.UnmarshalListOfMaps(results, &bindModel)
-		if err != nil {
-			return err
-		}
+		results = append(results, output.Responses[tableName]...)
+	}
 
+	err := dynamodbattribute.UnmarshalListOfMaps(results, &bindModel)
+	if err != nil {
+		return err
 	}
 
 	return nil
