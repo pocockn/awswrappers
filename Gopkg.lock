@@ -108,6 +108,23 @@
   version = "v1.1.4"
 
 [[projects]]
+  digest = "1:6144418cf5b91bd580352f566029392d2ad6d1727ca3899d9621f2efcdfd0475"
+  name = "github.com/vidsy/awswrappers"
+  packages = [
+    ".",
+    "comprehend",
+    "dynamodb",
+    "elastictranscoder",
+    "s3",
+    "ses",
+    "sns",
+    "sqs",
+  ]
+  pruneopts = "T"
+  revision = "100bf35831fff584359d4d81982ebd1d50560511"
+  version = "10.10.1"
+
+[[projects]]
   digest = "1:e54ada9794d22b2ce838651ccafc54e0f635f77a3ed0c9091e80a2d3dd86cdad"
   name = "github.com/vidsy/backoff"
   packages = ["."]
@@ -149,6 +166,14 @@
     "github.com/aws/aws-sdk-go/service/sqs/sqsiface",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
+    "github.com/vidsy/awswrappers",
+    "github.com/vidsy/awswrappers/comprehend",
+    "github.com/vidsy/awswrappers/dynamodb",
+    "github.com/vidsy/awswrappers/elastictranscoder",
+    "github.com/vidsy/awswrappers/s3",
+    "github.com/vidsy/awswrappers/ses",
+    "github.com/vidsy/awswrappers/sns",
+    "github.com/vidsy/awswrappers/sqs",
     "github.com/vidsy/backoff",
     "github.com/vidsy/go-kmsconfig/kmsconfig",
   ]
